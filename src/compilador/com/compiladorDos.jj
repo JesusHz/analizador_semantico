@@ -1,0 +1,1036 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(AnalizadorLexico)
+package compilador.com;
+import compiladores.vista.TablasS;
+import compiladores.vista.VistaInicial;
+import javax.swing.table.DefaultTableModel;
+import java.util.*;
+import com.logica.DeclaracionDeVariables;
+
+public class AnalizadorLexico
+{
+  //************************************************************************************
+  public static Hashtable ST = new Hashtable();
+
+  public static Validaciones validar;
+
+  public static GuardarVariables gv;
+
+  public static VistaInicial vista;
+
+  public static ArrayList < TAB > tablaSimbolos = new ArrayList < TAB > ();
+
+  public static ArrayList < TAB > tablaMetodos = new ArrayList < TAB > ();
+
+
+public static ArrayList<TAB> getTablaSimbolos() {
+	return tablaSimbolos;
+}
+
+public static void setTablaSimbolos(ArrayList<TAB> tablaSimbolos) {
+	AnalizadorLexico.tablaSimbolos = tablaSimbolos;
+}
+
+public static ArrayList<TAB> getTablaMetodos() {
+	return tablaMetodos;
+}
+
+public static void setTablaMetodos(ArrayList<TAB> tablaMetodos) {
+	AnalizadorLexico.tablaMetodos = tablaMetodos;
+}
+  
+  static String ambito;
+  static String prueba;
+
+  //************************************************************************************
+  static int numero = 0;
+
+  static private String texto = "";
+
+  static private String texto1 = "";
+
+  static boolean bien = true;
+
+  private static void grabarLexema(int n, String token, String lexema, int nL, int nC)
+  {
+    System.out.println(n + "- Token: " + token + " Lexema: " + lexema + " Linea:" + nL + " Columna:" + nC);
+  }
+
+  private static void grabarDatosPieza(int n, String token, Token pieza)
+  {
+    grabarLexema(n, token, pieza.image, pieza.beginLine, pieza.beginColumn);
+  }
+/*Metodo de recuperacion de errores */
+  public static void error_skipto(int kind, ParseException e)
+  {
+    e = generateParseException(); // se genera el objeto excepción
+    bien = false;
+    texto += e.toString() + "\n";
+    System.out.println(e.toString()); // se imprime el mensaje de error
+    Token t;
+    do
+    {
+      t = getNextToken();
+    }
+    while (t.kind != kind );
+  }
+
+ 
+
+  public static void main(String args []) throws ParseException
+  {
+    vista = new VistaInicial();
+    vista.setVisible(true);
+  
+  }
+
+  public void setNumero(int numero)
+  {
+    this.numero = numero;
+  }
+
+   public int getNumero()
+  {
+    return numero;
+  }
+
+  public void setTexto(String texto)
+  {
+    this.texto = texto;
+  }
+
+  public String getTexto()
+  {
+    return texto;
+  }
+
+  public void setTexto1(String texto1)
+  {
+    this.texto1 = texto1;
+  }
+
+  public String getTexto1()
+  {
+    return texto1;
+  }
+
+  public static boolean isBien()
+  {
+    return bien;
+  }
+
+  public static void setBien(boolean bien)
+  {
+    AnalizadorLexico.bien = bien;
+  }
+}
+
+PARSER_END(AnalizadorLexico)
+
+/* Espacio en blanco, saltos de linea, tabulares */
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+TOKEN : /* OPERADORES */
+{
+  < ADD_OP :
+    "+"
+  | "-" >
+| < MULT_OP :
+    "*"
+  | "/"
+  | "%" >
+| < ASIGNACION : "<-" >
+}
+
+TOKEN : /*PALABRAS RESERVADAS*/
+{
+  < ENTERO : "Entero" >
+| < LOGICO : "Logico" >
+| < CADENA : "Cadena" >
+| < MIENTRAS : "Mientras" >
+| < SI : "Si" >
+| < SINO : "Sino" >
+| < METODO : "Metodo" >
+| < LEER : "Leer" >
+| < IMPRIMIR : "Imprimir" >
+| < CONSOLA : "Consola" >
+| < FALSO : "Falso" >
+| < VERDADERO : "Verdadero" >
+| < NULO : "Nulo" >
+| < VACIO : "Vacio" >
+| < RETORNAR : "Retornar" >
+| < ESCRIBIR : "Escribir" >
+| < CONCATENACION : ">>" >
+}
+
+TOKEN : /*NUMEROS EJEMPLO 1, 1234, 987*/
+{
+  < NUMERO : (< DIGIT >)+ >
+| < #DIGIT : [ "0"-"9" ] >
+}
+
+TOKEN : /*IDENTIFICADORES EJEMPLO a, casa, clase1*/
+{
+  < IDENTIFICADOR : [ "a"-"z", "A"-"Z", "_" ] ([ "a"-"z", "A"-"Z", "0"-"9", "_" ])* >
+}
+
+TOKEN : /* AGRUPACION EJEMPLO { , }*/
+{
+  < CERRARCORCHETE : [ "]" ] >
+| < ABRIRCORCHETE : [ "[" ] >
+| < CERRARLLAVE : [ "}" ] >
+| < ABRIRLLAVE : [ "{" ] >
+}
+
+TOKEN : /* SEPARADOR , */
+{
+  < SEPARADOR : "," >
+}
+
+TOKEN : /* FIN DE SENTENCIA */
+{
+  < FINSENTENCIA : "." >
+}
+
+TOKEN : /*
+
+TOKEN : /* OPERADORES LOGICOS EJEMPLO & , | */
+{
+  < Y : "&" >
+| < O : "|" >
+}
+
+TOKEN : /*COMENTARIO EJEMPLO #hola este ejemplo # */
+{
+  < COMENTARIO : [ "#" ] (~[ "#" ])* [ "#" ] >
+}
+
+TOKEN : /*CADENAPALABRAS EJEMPLO "hola este ejemplo " */
+{
+  < CADENAPALABRA : [ "\"" ] (~[ "\"" ])* [ "\"" ] >
+}
+
+TOKEN : /*OPERADOR RELACIONAL  EJEMPLO #hola este ejemplo # */
+{
+  < OPERRELACION :
+    "<"
+  | ">"
+  | "<="
+  | ">="
+  | "=="
+  | "<>" >
+}
+
+/**
+ * Reconoce el contenido completo de un archivo
+ *
+ * TokenList -> (TokenElement)* 
+ */
+
+void Programa() :
+{
+numero = 0;
+}
+//inicio del programa y fin del programa
+{
+  listadoSentenciasGlobales()
+}
+
+void listadoSentenciasGlobales() :
+{}
+{
+  sentenciaGlobal()
+  (
+    sentenciaGlobal()
+  )*
+  < EOF >
+}
+
+void sentenciaGlobal() :
+{}
+{
+  LOOKAHEAD(2)
+  sentencia() 
+| 
+  declaracionMetodo()
+}
+
+//Sentencias es lo que se puede hacer pod fuera de un metodo o una condicion, son las mas clobales
+void sentencia() :
+{}
+{
+  declaracionVariable()
+  {
+   
+    }
+| 
+  try
+  {
+    asignacion() < FINSENTENCIA > 
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    llamadoEscribir() < FINSENTENCIA > 
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    llamadoConsola() < FINSENTENCIA > 
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    mientras() < CERRARCORCHETE > 
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+| 
+  try
+  {
+    condicional() < CERRARCORCHETE > 
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+| 
+  try
+  {
+    llamadoLeer() < FINSENTENCIA > 
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    metodoSino() < CERRARCORCHETE > 
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+}
+
+//Permite declarar las variables de forma no recursiva
+void declaracionVariable() :
+{
+ 
+  Token pieza, piezaTipo;
+  ambito = "Global";
+  ArrayList < String > variableIn = new ArrayList < String > ();
+}
+{
+  try
+  {
+    piezaTipo = < ENTERO > pieza = < IDENTIFICADOR > [ variableIn = datoIdentificador() ] < FINSENTENCIA >
+    {
+      if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, pieza.image)))
+      {
+        bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine  + " la variable ( " + pieza.image + " ) ya ha sido declarada" + "\n";
+      }
+      else
+       {
+        tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, pieza.image));
+       } 
+        for (int i = 0; i < variableIn.size(); i++)
+        {
+          if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i))))
+          {
+            bien = false;
+            texto += "Error semantico en la linea " + pieza.endLine  + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+          }
+          else
+          {
+            tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i)));
+          }
+        }
+      
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    piezaTipo = < CADENA > pieza = < IDENTIFICADOR > [ variableIn = datoIdentificador() ] < FINSENTENCIA >
+    {
+      if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, pieza.image)))
+      {
+        bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada";
+      }
+      else
+      {
+        tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, pieza.image));
+        for (int i = 0; i < variableIn.size(); i++)
+        {
+          if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i))))
+          {
+            bien = false;
+            texto += "Error semantico en la linea " + pieza.endLine  + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+          }
+          else
+          {
+            tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i)));
+          }
+        }
+      }
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    piezaTipo = < LOGICO > pieza = < IDENTIFICADOR > [ variableIn = datoIdentificador() ] < FINSENTENCIA >
+    {
+      if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, pieza.image)))
+      {
+        bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine  + " la variable " + pieza.image + " ya ha sido declarada";
+      }
+      else
+      {
+        for (int i = 0; i < variableIn.size(); i++)
+        {
+          if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i))))
+          {
+            bien = false;
+            texto += "Error semantico en la linea " + pieza.endLine  + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+          }
+          else
+          {
+            tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i)));
+          }
+        }
+      }
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+}
+
+//metodo recursivo para poder tener muchos identificadores
+ArrayList datoIdentificador() :
+{
+ 
+  Token pieza;
+  ArrayList < String > variableIn = new ArrayList < String > ();
+}
+{
+  (
+    < SEPARADOR > pieza = < IDENTIFICADOR >
+    {
+      variableIn.add(pieza.image);
+    }
+    (
+      < SEPARADOR > pieza = < IDENTIFICADOR >
+      {
+        variableIn.add(pieza.image);
+      }
+    )*
+  )
+  {
+    return variableIn;
+  }
+}
+
+//Permite asignar varas variables a una solo identificador
+void asignacion() :
+{
+  
+  Token pieza;
+  Token h;
+}
+{
+  pieza = < IDENTIFICADOR > < ASIGNACION > expresion()
+  {
+    if (!validar.validarAsignacion(pieza.image))
+    {
+      bien = false;
+      texto += "Error semantico en la linea " + pieza.endLine + 
+      " la variable (" + pieza.image + ") no ha sido declarada" + "\n";
+    }else
+     if(!validar.validarTipoDeDatos()){
+       bien = false;
+          texto += "Error semantico en la linea " + pieza.endLine + 
+        "Las Variable no son compatibles " + "\n";
+       }
+   
+   
+  }
+}
+
+void expresion() :
+{
+
+  Token pieza;
+}
+{
+  metodoLeer()
+| pieza = < CADENAPALABRA >
+   {
+     Validaciones.guardarTipoRetorno(pieza.image);  
+   }
+| < CONCATENACION >
+| < LOGICO >
+| LOOKAHEAD(2)
+  metodoMetodo()
+| LOOKAHEAD(2)
+  expresionMatematica()	
+}
+
+//Forma de llamar un metodo ej a {Entero h}.
+void metodoMetodo() :
+{
+  Token pieza;
+}
+{
+  pieza = < IDENTIFICADOR > < ABRIRLLAVE > [ argumentosSolos() ] < CERRARLLAVE >
+  {
+      if (!validar.validarCrearMetodo(pieza.image))
+      {
+        bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine + 
+        " el metodo (" + pieza.image + ") no ha sido declarada" + "\n";
+      }
+      prueba = pieza.image;
+    
+       
+  }
+}
+
+//Son los valores que se van a utilizar por dentro de las { }
+void parametros() :
+{}
+{
+  expresion() [ < SEPARADOR > parametros() ]
+}
+
+void llamadoLeer() :
+{}
+{
+  < LEER > < ABRIRLLAVE > < CERRARLLAVE >
+}
+
+void metodoLeer() :
+{}
+{
+  < LEER > < ABRIRLLAVE > < CERRARLLAVE >
+}
+
+void expresionMatematica() :
+{}
+{
+  term()
+  (
+    < ADD_OP > term()
+  )*
+}
+
+void term() :
+{}
+{
+  factor()
+  (
+    < MULT_OP > factor()
+  )*
+}
+
+void factor() :
+{
+Token pieza;
+ }
+{
+  < ABRIRLLAVE > expresionMatematica() < CERRARLLAVE >
+| < NUMERO >
+{
+    validar.guardarEntero();
+}
+| pieza = < IDENTIFICADOR >
+   {
+     Validaciones.guardarIdentificadores(pieza.image);  
+   }
+}
+
+void concatenar() :
+{}
+{
+  expresion() < CONCATENACION > expresion() [ concatenarMas() ]
+}
+
+void concatenarMas() :
+{}
+{
+  < CONCATENACION > expresion() [ concatenarMas() ]
+}
+
+void llamadoEscribir() :
+{}
+{
+  < ESCRIBIR > < ABRIRLLAVE > [ escriParametros() ] < CERRARLLAVE >
+}
+
+void escriParametros() :
+{}
+{
+  expresion() [ escriParametros() ]
+}
+
+void llamadoConsola() :
+{}
+{
+  < CONSOLA > < ABRIRLLAVE > expresion()
+  (
+    expresion()
+  )*
+  < CERRARLLAVE >
+}
+
+void mientras() :
+{}
+{
+  < MIENTRAS > < ABRIRLLAVE > condicion() < CERRARLLAVE > < ABRIRCORCHETE > [ listadoSentenciaInterna() ]
+}
+
+void condicion() :
+{}
+{
+  expCondicion() [ < LOGICO > expCondicion() ]
+}
+
+void expCondicion() :
+{}
+{
+  LOOKAHEAD(2)
+  expRelacional()
+| < NUMERO >
+| LOOKAHEAD(2)
+  < IDENTIFICADOR >
+| metodoMetodo()
+| < LOGICO >
+}
+
+void expRelacional() :
+{}
+{
+  expRelacion() < OPERRELACION > expRelacion() [ < Y > expRelacional() ]
+  [
+    LOOKAHEAD(2)
+    < O > expRelacional()
+  ]
+}
+
+void expRelacion() :
+{}
+{
+  LOOKAHEAD(2)
+  expresionMatematica()
+| metodoMetodo()
+| < NULO >
+}
+
+void listadoSentenciaInterna() :
+{}
+{
+  sentenciaInt() [ listadoSentenciaInterna() ]
+}
+
+//Si Condicional.
+void condicional() :
+{}
+{
+  < SI > < ABRIRLLAVE > condicion() < CERRARLLAVE > < ABRIRCORCHETE > [ listadoSentenciaInterna() ]
+}
+
+// declaracion de los metodos 
+void declaracionMetodo() :
+{
+
+  String image;
+  Token pieza;
+  Token piezaVacio;
+  ArrayList < String > tipoDato = new ArrayList < String > ();
+}
+{
+  try
+  {
+    image = tipoRetur() < METODO > pieza = < IDENTIFICADOR >
+    {
+      ambito = pieza.image;
+    }
+    < ABRIRLLAVE > [ tipoDato = argumentos() ] < CERRARLLAVE > < ABRIRCORCHETE > 
+    [ listadoSentenciaInterna() ] retur()< CERRARCORCHETE >
+    {
+      if (Validaciones.verificarVariableMetodos(new TAB(pieza.image, image, "", null, pieza.image)))
+      {
+        bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine  + " El metodo (" + pieza.image + ") ya ha sido declarado" + "\n";
+      }
+      else
+      {
+        tablaMetodos.add(new TAB(pieza.image, image, "", tipoDato.toString(), pieza.image));
+
+        
+       if(!Validaciones.validarRetorno(pieza.image)) {
+            bien = false;
+          texto += "Error semantico en la linea " + pieza.endLine + " El tipo de retorno no es correcto" + "\n"; 
+       }
+     
+       
+        
+      }
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+| 
+  try
+  {
+     < VACIO > < METODO > pieza = < IDENTIFICADOR >
+
+     { ambito = pieza.image; }
+   
+    < ABRIRLLAVE > [ tipoDato = argumentos() ] < CERRARLLAVE > < ABRIRCORCHETE > 
+    [ listadoSentenciaInterna() ] < CERRARCORCHETE >
+    {
+         if (Validaciones.verificarVariableMetodos(new TAB(pieza.image, ambito, " ", null, pieza.image)))
+      {
+           bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine + " El metodo (" + pieza.image + ") ya ha sido declarado" + "\n";
+      }
+      else
+      {
+        tablaMetodos.add(new TAB(pieza.image, "Vacio", "", tipoDato.toString(), pieza.image));
+      }
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+}
+
+String tipoRetur() :
+{
+  Token pieza = null;
+}
+{
+  pieza = < CADENA >
+  {
+    return pieza.image;
+  }
+| 
+  pieza = < ENTERO >
+  {
+    return pieza.image;
+  }
+| 
+  pieza = < LOGICO >
+  {
+    return pieza.image;
+  }
+}
+
+// argumentos retorna un arreglo
+ArrayList argumentos() :
+{
+
+  Token pieza;
+  String interno;
+  ArrayList < String > variableIn = new ArrayList < String > ();
+  ArrayList < String > tipoDato = new ArrayList < String > ();
+}
+{
+  (
+    interno = tipoParametro() pieza = < IDENTIFICADOR >
+    {
+      tipoDato.add(interno);
+      if (Validaciones.verificarVariable(new TAB(interno, ambito, "", null, pieza.image)))
+      {
+           bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+      }
+      else
+      {
+        tablaSimbolos.add(new TAB(interno, ambito, "", null, pieza.image));
+      }
+    }
+    (
+      < SEPARADOR > interno = tipoParametro()
+      {
+        tipoDato.add(interno);
+      }
+      pieza = < IDENTIFICADOR >
+      {
+        if (Validaciones.verificarVariable(new TAB(interno, ambito, "", null, pieza.image)))
+        {
+             bien = false;
+          texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+        }
+        else
+        {
+          tablaSimbolos.add(new TAB(interno, ambito, "", null, pieza.image));
+        }
+      }
+    )*
+  )
+  {
+    return tipoDato;
+  }
+}
+
+String tipoParametro() :
+{
+  Token pieza;
+}
+{
+  pieza = < ENTERO >
+  {
+    return pieza.image;
+  }
+| 
+  pieza = < CADENA >
+  {
+    return pieza.image;
+  }
+| 
+  pieza = < LOGICO >
+  {
+    return pieza.image;
+  }
+}
+
+void retur() :{}
+{
+  < RETORNAR > expresion() < FINSENTENCIA >
+  
+}
+
+void metodoSino() :
+{}
+{
+  < SINO > < ABRIRCORCHETE > [ listadoSentenciaInterna() ]
+}
+
+void sentenciaInt() :
+{}
+{
+  declaracionVariableInterna()
+  {}
+| 
+  try
+  {
+    asignacion() < FINSENTENCIA >
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    llamadoEscribir() < FINSENTENCIA >
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    llamadoConsola() < FINSENTENCIA >
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    mientras() < CERRARCORCHETE >
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+| 
+  try
+  {
+    condicional() < CERRARCORCHETE >
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+| 
+  try
+  {
+    llamadoLeer() < FINSENTENCIA >
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    metodoSino() < CERRARCORCHETE >
+  }
+  catch (ParseException e)
+  {
+    error_skipto(CERRARCORCHETE, e);
+  }
+}
+
+//Permite declarar las variables de forma no recursiva
+void declaracionVariableInterna() :
+{
+  
+  Token pieza, piezaTipo;
+  ArrayList < String > variableIn = new ArrayList < String > ();
+  ArrayList < DeclaracionDeVariables > guardar = new ArrayList < DeclaracionDeVariables > ();
+}
+{
+  try
+  {
+    piezaTipo = < ENTERO > pieza = < IDENTIFICADOR > [ variableIn = datoIdentificador() ] < FINSENTENCIA >
+    {
+      if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, pieza.image)))
+      {
+           bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+      }
+      else
+      {
+        tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, pieza.image));
+        for (int i = 0; i < variableIn.size(); i++)
+        {
+          if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i))))
+          {
+               bien = false;
+            texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+          }
+          else
+          {
+            tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i)));
+          }
+        }
+      }
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    piezaTipo = < CADENA > pieza = < IDENTIFICADOR > [ variableIn = datoIdentificador() ] < FINSENTENCIA >
+    {
+      if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, pieza.image)))
+      {
+           bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+      }
+      else
+      {
+        tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, pieza.image));
+        for (int i = 0; i < variableIn.size(); i++)
+        {
+          if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i))))
+          {
+               bien = false;
+            texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+          }
+          else
+          {
+            tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i)));
+          }
+        }
+      }
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+| 
+  try
+  {
+    piezaTipo = < LOGICO > pieza = < IDENTIFICADOR > [ variableIn = datoIdentificador() ] < FINSENTENCIA >
+    {
+      if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, pieza.image)))
+      {
+           bien = false;
+        texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+      }
+      else
+      {
+        tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, pieza.image));
+        for (int i = 0; i < variableIn.size(); i++)
+        {
+          if (Validaciones.verificarVariable(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i))))
+          {
+               bien = false;
+            texto += "Error semantico en la linea " + pieza.endLine + " la variable " + pieza.image + " ya ha sido declarada" + "\n";
+          }
+          else
+          {
+            tablaSimbolos.add(new TAB(piezaTipo.image, ambito, "", null, variableIn.get(i)));
+          }
+        }
+      }
+    }
+  }
+  catch (ParseException e)
+  {
+    error_skipto(FINSENTENCIA, e);
+  }
+}
+
+void argumentosSolos() :
+{}
+{
+  < IDENTIFICADOR > (< SEPARADOR > < IDENTIFICADOR >)*
+}

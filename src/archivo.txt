@@ -1,0 +1,5 @@
+Entero a.
+
+Cadena f.
+
+a <- f.

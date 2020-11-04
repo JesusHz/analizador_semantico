@@ -1,0 +1,2 @@
+Entero a .
+a <- Leer{} .
